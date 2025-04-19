@@ -1,4 +1,6 @@
 import pygame
+import random
+import math
 
 class Particle:
     needsDel = False
@@ -20,10 +22,11 @@ class Particle:
             self.needsDel = True
 
 class Impact_Particle(Particle):
-    def __init__(self,screen,xpos,ypos,col,size):
+    def __init__(self,screen,xpos,ypos,col,size,spacing):
         super().__init__(screen,xpos,ypos,maxframes=7,delay=50)
         self.col = col
         self.size = size
+        self.spacing = spacing
 
     def draw(self):
         points = []
@@ -46,5 +49,25 @@ class Impact_Particle(Particle):
 
         for item in points:
             pygame.draw.rect(self.screen,self.col,
-        (self.xpos+item[0]-self.size//2,
-            self.ypos+item[1]-self.size//2,self.size,self.size))
+        (self.xpos+(item[0]*self.spacing)-self.size//2,
+            self.ypos+(item[1]*self.spacing)-self.size//2,self.size,self.size))
+
+class Impact_Bits(Particle):
+    def __init__(self,screen,xpos,ypos,col,size,vel,maxbits=10,minbits=3,gravity=1):
+        super().__init__(screen,xpos,ypos,maxframes=1000,delay=2)
+        self.col = col
+        self.size = size
+        self.gravity = gravity
+        self.bits = []
+        for _ in range(random.randint(minbits,maxbits)):
+            angle = random.randint(180,360)
+            xvel = vel * math.cos(math.radians(angle))
+            yvel = vel * math.sin(math.radians(angle))
+            self.bits.append([xpos,ypos,xvel,yvel,angle])
+
+    def draw(self):
+        for item in self.bits:
+            item[0] += item[2]
+            item[1] += item[3]
+            item[3] += self.gravity
+            pygame.draw.rect(self.screen,self.col,(item[0],item[1],self.size,self.size))

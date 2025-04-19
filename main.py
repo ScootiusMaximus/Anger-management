@@ -78,8 +78,10 @@ class Game:
 
     def tick_particles(self):
         time = self.now()
-        for item in self.particles:
+        for item in self.particles.copy():
             item.tick(time)
+            if item.needsDel:
+                self.particles.remove(item)
 
     def tick_fist(self):
         if self.fist.pressed:
@@ -92,7 +94,9 @@ class Game:
             if pygame.Rect.colliderect(item.get_rect(),fist):
                 item.needsDel = True
                 self.particles.append(
-                    Impact_Particle(self.screen, item.xpos, item.ypos, item.col, item.SCALE * 10))
+                    #Impact_Particle(self.screen, item.xpos, item.ypos, item.col, item.SCALE * 10, item.SCALE*4))
+                    Impact_Bits(self.screen, item.xpos, item.ypos, item.col, item.SCALE*10, 30))
+
                 self.score += self.value
 
     def draw_all(self):
@@ -195,6 +199,10 @@ class Game:
         if togglesidebar.is_pressed():
             self.sidebar.showing = not self.sidebar.showing
 
+    def show_debug(self):
+        if self.settings.debug:
+            debug.display()
+
     def go_to_menu(self):
         self.scene = "menu"
         upgradevaluebox.pressable = False
@@ -217,8 +225,7 @@ class Game:
                         self.quit()
                     else:
                         self.go_to_menu()
-                if event.key == pygame.K_SPACE:
-                    self.keys_down.append(event.key)
+                self.keys_down.append(event.key)
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_SPACE:
                     self.keys_up.append(event.key)
@@ -238,6 +245,9 @@ class Game:
             if pygame.K_SPACE in self.keys_up:
                 self.fist.pressed = False
 
+        if pygame.K_F1 in self.keys_down:
+            self.settings.debug = not self.settings.debug
+
     def cleanup(self):
         for item in self.smashables.copy():
             if item.needsDel:
@@ -250,6 +260,7 @@ class Game:
             pygame.display.flip()
             self.screen.fill(self.settings.bgcol)
 
+            debug.set_message(f"P: {len(self.particles)} T: {self.now()}")
             self.handle_events()
             self.handle_keys()
             self.run_textboxes()
@@ -269,6 +280,8 @@ class Game:
                 self.draw_sidebar()
 
                 self.apply_camerashake()
+
+            self.show_debug()
 
 the_game = Game()
 asyncio.run(the_game.start())
