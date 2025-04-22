@@ -39,7 +39,7 @@ class Fist(Sprite):
     pressed = False
     def __init__(self, screen, xpos, ypos):
         super().__init__(screen, xpos, ypos)
-        self.img = pygame.transform.scale_by(self.img, self.SCALE)
+        self.img = pygame.Surface.convert_alpha(pygame.transform.scale_by(self.img, self.SCALE))
         self.width, self.height = self.img.get_size()
         self.col = self.img.get_at((self.width//2,self.height//2))
 
@@ -48,7 +48,7 @@ class Glass(Sprite):
     name = "glass"
     def __init__(self,screen,xpos,ypos):
         super().__init__(screen,xpos,ypos)
-        self.img = pygame.transform.scale_by(self.img,self.SCALE)
+        self.img = pygame.Surface.convert_alpha(pygame.transform.scale_by(self.img,self.SCALE))
         self.width, self.height = self.img.get_size()
         self.col = self.img.get_at((self.width // 2, self.height // 2))
 
@@ -57,7 +57,7 @@ class Clock(Sprite):
     name = "clock"
     def __init__(self,screen,xpos,ypos):
         super().__init__(screen,xpos,ypos)
-        self.img = pygame.transform.scale_by(self.img,self.SCALE)
+        self.img = pygame.Surface.convert_alpha(pygame.transform.scale_by(self.img,self.SCALE))
         self.width, self.height = self.img.get_size()
         self.col = self.img.get_at((self.width // 2, self.height // 2))
 
@@ -66,6 +66,6 @@ class Apple(Sprite):
     name = "apple"
     def __init__(self,screen,xpos,ypos):
         super().__init__(screen,xpos,ypos)
-        self.img = pygame.transform.scale_by(self.img,self.SCALE)
+        self.img = pygame.Surface.convert_alpha(pygame.transform.scale_by(self.img,self.SCALE))
         self.width, self.height = self.img.get_size()
         self.col = self.img.get_at((self.width // 2, self.height // 2))

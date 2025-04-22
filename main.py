@@ -3,6 +3,7 @@ import json
 import pygame
 import sys
 import random
+import numpy
 
 from game_files.sprites import *
 from game_files.boxes import *
@@ -10,12 +11,15 @@ from game_files.camerashake import Camerashake
 from game_files.settings import Settings
 from game_files.particles import *
 from game_files.sidebar import Sidebar
+from game_files.image_loader import Image_Loader
 
 class Game:
     pygame.init()
     flags = pygame.RESIZABLE | pygame.SRCALPHA
     scrw = 1280
+    #scrw = 640
     scrh = 720
+    #scrh = 360
     FPS = 60
     screen = pygame.display.set_mode((scrw,scrh),flags=flags)
     clock = pygame.time.Clock()
@@ -38,14 +42,30 @@ class Game:
 
         self.camerashake = Camerashake()
         self.sidebar = Sidebar(self.screen)
+        self.images = Image_Loader(self.scrw,self.scrh)
         self.fist = Fist(self.screen,self.scrw*0.2,self.scrh*0.2)
         self.settings = Settings()
+
+        self.log = {}
 
         for box in boxes:
             box.screen = self.screen
 
         reposition_boxes(self.scrw,self.scrh)
         self.load()
+
+    def save_to_log(self):
+        with open("log.txt","w") as file:
+            for key in self.log:
+                file.write(f"{key}: {numpy.mean(self.log[key])}\n")
+
+    def time(self,method,message):
+        start = self.now()
+        method()
+        end = self.now()
+        if message not in self.log:
+            self.log[message] = []
+        self.log[message].append(end-start)
 
     def load(self):
         with open("game_files/upgrades.json","r") as file:
@@ -107,6 +127,9 @@ class Game:
             item.draw()
 
         self.fist.draw()
+
+    def draw_background(self):
+        self.screen.blit(self.images.background,(0,0))
 
     def draw_sidebar(self):
         if self.sidebar.showing:
@@ -210,6 +233,7 @@ class Game:
         upgradespeedbox.pressable = False
 
     def quit(self):
+        self.save_to_log()
         pygame.quit()
         sys.exit()
 
@@ -253,6 +277,11 @@ class Game:
             if item.needsDel:
                 self.smashables.remove(item)
 
+    def get_fps(self):
+        fps = str(self.clock.get_fps())
+        return fps[:4]
+
+
     async def start(self):
         while True:
             await asyncio.sleep(0)
@@ -260,9 +289,12 @@ class Game:
             pygame.display.flip()
             self.screen.fill(self.settings.bgcol)
 
-            debug.set_message(f"P: {len(self.particles)} T: {self.now()}")
+            debug.set_message(f"P: {len(self.particles)} FPS: {self.get_fps()}")
             self.handle_events()
             self.handle_keys()
+
+            self.time(self.draw_background,"draw background")
+            #self.time(self.run_textboxes,"textboxes")
             self.run_textboxes()
 
             if self.scene == "ingame":

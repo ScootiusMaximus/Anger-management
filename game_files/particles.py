@@ -54,7 +54,7 @@ class Impact_Particle(Particle):
 
 class Impact_Bits(Particle):
     def __init__(self,screen,xpos,ypos,col,size,vel,maxbits=10,minbits=3,gravity=1):
-        super().__init__(screen,xpos,ypos,maxframes=1000,delay=2)
+        super().__init__(screen,xpos,ypos,maxframes=100,delay=2)
         self.col = col
         self.size = size
         self.gravity = gravity
